@@ -35,8 +35,6 @@ static DesktopWindow StandingWindow;
 void UpdateGame()
 {
 
-    DragPet();
-
     // Check for ground collision
     WorkArea = GetWorkArea();
     ScreenArea = (RECT){0, 0, GetScreenWidth(), GetScreenHeight()};
@@ -45,7 +43,7 @@ void UpdateGame()
     int count;
     GetWindowsByLayer(windows, &count);
 
-    GroundWindow = (DesktopWindow){.rect = {0, ScreenArea.bottom, 0, ScreenArea.bottom}, .layer = -1, .title = "NoneAtGround"};
+    GroundWindow = (DesktopWindow){.rect = {0, ScreenArea.bottom - abs(ScreenArea.bottom - WorkArea.bottom), 0, ScreenArea.bottom}, .layer = -1, .title = "NoneAtGround"};
     TopWindow = (DesktopWindow){.rect = {0, ScreenArea.bottom, 0, ScreenArea.bottom}, .layer = -1, .title = "NoneAtTop"};
 
     StandingWindow = (DesktopWindow){.rect = {0, ScreenArea.bottom, 0, ScreenArea.bottom}, .layer = -1, .title = "NoneAtStanding"};
@@ -55,7 +53,7 @@ void UpdateGame()
         RECT windowRect = windows[i].rect;
         if (petPosition.x > windowRect.left && petPosition.x < windowRect.right)
         {
-            if (windowRect.top < GroundWindow.rect.top && petPosition.y < windowRect.top)
+            if (windowRect.top < GroundWindow.rect.top && petPosition.y <= windowRect.top && windowRect.top > 0)
                 GroundWindow = windows[i];
 
             if (windowRect.top < TopWindow.rect.top && petPosition.y > windowRect.top)
@@ -67,11 +65,11 @@ void UpdateGame()
     {
         StandingWindow = GroundWindow;
     }
-    else if (TopWindow.layer != -1 && GroundWindow.rect.top > TopWindow.rect.bottom)
+    else if (TopWindow.layer != -1 && GroundWindow.rect.top >= TopWindow.rect.bottom)
     {
         StandingWindow = GroundWindow;
     }
-    else if (TopWindow.layer != -1 && GroundWindow.rect.top < TopWindow.rect.bottom && GroundWindow.layer < TopWindow.layer)
+    else if (TopWindow.layer != -1 && GroundWindow.rect.top <= TopWindow.rect.bottom && GroundWindow.layer < TopWindow.layer)
     {
         StandingWindow = GroundWindow;
     }
@@ -80,12 +78,15 @@ void UpdateGame()
         StandingWindow = (DesktopWindow){.rect = {0, ScreenArea.bottom, 0, ScreenArea.bottom}, .layer = -1, .title = "NoneAtGround"};
     }
 
-    if (GroundWindow.rect.top == petPosition.y)
+    if (abs(StandingWindow.rect.top - petPosition.y) < 10 && petVelocity.y > 0 || petPosition.y > ScreenArea.bottom)
     {
-        petPosition.y = WorkArea.top;
+        petPosition.y = StandingWindow.rect.top - 5;
         petVelocity.y = 0.0f;
         petVelocity.x *= 0.95f;
     }
+
+    DragPet();
+
 }
 
 void DragPet()
@@ -129,24 +130,13 @@ void DragPet()
             petPosition.x = WorkArea.left;
         if (petPosition.x > WorkArea.right)
             petPosition.x = WorkArea.right;
-        if (petPosition.y > WorkArea.bottom)
-            petPosition.y = WorkArea.bottom;
+        if (petPosition.y > GroundWindow.rect.bottom)
+            petPosition.y = GroundWindow.rect.bottom;
     }
 }
 
 void DrawGame()
 {
-
-    // write top window title and ground window title
-
-    DrawText(TextFormat("Ground Window: %s", GroundWindow.title), 15, 30, 20, MAGENTA);
-    DrawText(TextFormat("Top Window: %s", TopWindow.title), 15, 60, 20, MAGENTA);
-
-    DrawText(TextFormat("Standing Window: %s", StandingWindow.title), 15, 150, 20, MAGENTA);
-    DrawFPS(15, 10); // Draw FPS in the top-left corner
-    // Write Player Velocity and Position
-    DrawText(TextFormat("Player Position: %f, %f", petPosition.x, petPosition.y), 15, 90, 20, MAGENTA);
-    DrawText(TextFormat("Player Velocity: %f, %f", petVelocity.x, petVelocity.y), 15, 120, 20, MAGENTA);
 
     // DrawFPS(10, 10); // Draw FPS in the top-left corner
 
