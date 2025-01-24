@@ -1,28 +1,30 @@
-#include "./headers/game.h"
-#include "./headers/winapi.h"
+#include "game.h"
+#include "winapi.h"
 #include "raylib.h"
 #include "raymath.h"
+#include "assets.h"
 #include <stdio.h>
-
-// Sprites from Assets
-extern Texture2D petSprite;
 
 static Vector2 petPosition;
 static Vector2 petVelocity;
+
 static bool dragging = false;
 static Vector2 dragOffset;
-static float petGravity = 1024.0f;
+static float petGravity = 2048.0f;
 
 static Vector2 lastMousePosition;
 
-static double lastUpdateTime = 0.0;
-static const double updateInterval = 0.01; // 10 ms
+// Sprites from Assets
+extern Texture2D petSprite;
 
 void InitGame()
 {
     petPosition = (Vector2){200, 200};
     petVelocity = (Vector2){0, 0};
     dragging = false;
+
+    // Load assets
+    LoadAssets();
 }
 
 static DesktopWindow GroundWindow;
@@ -34,7 +36,6 @@ static DesktopWindow StandingWindow;
 
 void UpdateGame()
 {
-
     // Check for ground collision
     WorkArea = GetWorkArea();
     ScreenArea = (RECT){0, 0, GetScreenWidth(), GetScreenHeight()};
@@ -78,7 +79,7 @@ void UpdateGame()
         StandingWindow = (DesktopWindow){.rect = {0, ScreenArea.bottom, 0, ScreenArea.bottom}, .layer = -1, .title = "NoneAtGround"};
     }
 
-    if (abs(StandingWindow.rect.top - petPosition.y) < 10 && petVelocity.y > 0 || petPosition.y > ScreenArea.bottom)
+    if ((abs(StandingWindow.rect.top - petPosition.y) < 10 && petVelocity.y > 0) || petPosition.y > ScreenArea.bottom)
     {
         petPosition.y = StandingWindow.rect.top - 5;
         petVelocity.y = 0.0f;
@@ -86,7 +87,6 @@ void UpdateGame()
     }
 
     DragPet();
-
 }
 
 void DragPet()
@@ -137,11 +137,10 @@ void DragPet()
 
 void DrawGame()
 {
-
     // DrawFPS(10, 10); // Draw FPS in the top-left corner
 
     Rectangle sourceRec = {0.0f, 0.0f, (float)petSprite.width, (float)petSprite.height};
-    Rectangle destRec = {petPosition.x, petPosition.y, (float)petSprite.width, (float)petSprite.height};
+    Rectangle destRec = {petPosition.x, petPosition.y + 5, (float)petSprite.width, (float)petSprite.height};
     Vector2 origin = {(float)petSprite.width / 2, (float)petSprite.height};
 
     // Draw the texture with the specified parameters

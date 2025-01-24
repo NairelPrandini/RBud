@@ -2,7 +2,7 @@
 #include <dwmapi.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include "./headers/winapi.h"
+#include "winapi.h"
 
 
 HWND WindowHandle;

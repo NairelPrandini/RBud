@@ -1,7 +1,7 @@
 #include "raylib.h"
-#include "./headers/game.h"
-#include "./headers/assets.h"
-#include "./headers/winapi.h"
+#include "game.h"
+#include "assets.h"
+#include "winapi.h"
 #include <pthread.h>
 
 int main(void)
@@ -18,7 +18,7 @@ int main(void)
     // Initialize game
     InitGame();
     
-    // SetTargetFPS(60);
+    SetTargetFPS(200);
 
     while (!WindowShouldClose())
     {
